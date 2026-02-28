@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dujana Spare Parts | ዱጃና የተሽከርካሪ መለዋወጫዎች</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=Abyssinica+SIL&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- PARTICLES BACKGROUND -->
+<canvas id="particles" class="particles-canvas"></canvas>
+
+<!-- SPINNER -->
+<div id="spinner" class="spinner-overlay hidden">
+  <div class="spinner-ring"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<!-- ═══ HEADER ════════════════════════════════════════════════════════════════ -->
+<header class="header" id="mainHeader">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon"><i class="fa-solid fa-gear"></i></div>
+      <div class="logo-text-wrap">
+        <span class="logo-main">DUJANA</span>
+        <span class="logo-sub">SPARE PARTS</span>
+      </div>
+    </div>
+    <nav class="nav-links">
+      <a href="#hero" data-en="Home" data-am="መነሻ">Home</a>
+      <a href="#products" data-en="Products" data-am="ምርቶች">Products</a>
+      <a href="#blog" data-en="Blog" data-am="ጦማር">Blog</a>
+      <a href="#about" data-en="About" data-am="ስለ እኛ">About</a>
+      <a href="#contact" data-en="Contact" data-am="ያግኙን">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <button class="lang-btn" onclick="toggleLanguage()">
+        <i class="fa-solid fa-globe"></i> <span id="langLabel">አማርኛ</span>
+      </button>
+      <button class="admin-btn" id="adminBtn" onclick="openLoginModal()">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span data-en="Admin" data-am="አስተዳዳሪ">Admin</span>
+      </button>
+      <button class="hamburger" id="hamburger" onclick="toggleMobileNav()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="#hero" onclick="toggleMobileNav()">Home</a>
+    <a href="#products" onclick="toggleMobileNav()">Products</a>
+    <a href="#blog" onclick="toggleMobileNav()">Blog</a>
+    <a href="#about" onclick="toggleMobileNav()">About</a>
+    <a href="#contact" onclick="toggleMobileNav()">Contact</a>
+  </div>
+</header>
+
+<!-- ═══ HERO ══════════════════════════════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="hero-slides" id="heroSlides">
+
+    <div class="hero-slide slide-green active">
+      <div class="hero-bg-shape"></div>
+      <div class="hero-content">
+        <div class="hero-badge reveal"><i class="fa-solid fa-award"></i> <span data-en="Ethiopia's #1 Auto Parts Store" data-am="የኢትዮጵያ ቁጥር 1 የቅ/ዕቃ ሱቅ">Ethiopia's #1 Auto Parts Store</span></div>
+        <h1 class="hero-title reveal-up">
+          <span data-en="Premium Quality" data-am="ፕሪሚየም ጥራት">Premium Quality</span><br/>
+          <em data-en="Auto Parts" data-am="የሞተር ዕቃዎች">Auto Parts</em>
+        </h1>
+        <p class="hero-desc reveal-up" data-en="Find genuine OEM and aftermarket parts for every vehicle. Fast delivery across Ethiopia." data-am="ለእያንዳንዱ ተሽከርካሪ ትክክለኛ OEM እና የድህረ-ገበያ ዕቃዎችን ያግኙ።">Find genuine OEM and aftermarket parts for every vehicle. Fast delivery across Ethiopia.</p>
+        <div class="hero-btns reveal-up">
+          <a href="#products" class="btn-hero-primary"><i class="fa-solid fa-bolt"></i> <span data-en="Shop Now" data-am="አሁን ይግዙ">Shop Now</span></a>
+          <a href="#about" class="btn-hero-outline"><span data-en="Learn More" data-am="ተጨማሪ">Learn More</span> <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div class="hero-stats reveal-up">
+          <div class="stat"><strong>500+</strong><span data-en="Products" data-am="ምርቶች">Products</span></div>
+          <div class="stat-divider"></div>
+          <div class="stat"><strong>2,000+</strong><span data-en="Happy Clients" data-am="ደስተኛ ደንበኞች">Happy Clients</span></div>
+          <div class="stat-divider"></div>
+          <div class="stat"><strong>10+</strong><span data-en="Years Exp." data-am="ዓመት ልምድ">Years Exp.</span></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-car-graphic">
+          <div class="car-glow"></div>
+          <i class="fa-solid fa-car hero-car-icon"></i>
+          <div class="floating-badge b1"><i class="fa-solid fa-shield-check"></i> <span data-en="OEM Quality" data-am="OEM ጥራት">OEM Quality</span></div>
+          <div class="floating-badge b2"><i class="fa-solid fa-truck-fast"></i> <span data-en="Fast Delivery" data-am="ፈጣን ማድረስ">Fast Delivery</span></div>
+          <div class="floating-badge b3"><i class="fa-solid fa-tags"></i> <span data-en="Best Prices" data-am="ምርጥ ዋጋዎች">Best Prices</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-slide slide-dark">
+      <div class="hero-bg-shape"></div>
+      <div class="hero-content">
+        <div class="hero-badge reveal"><i class="fa-solid fa-truck-fast"></i> <span data-en="Nationwide Delivery" data-am="ሀገር አቀፍ ማድረስ">Nationwide Delivery</span></div>
+        <h1 class="hero-title reveal-up">
+          <span data-en="Trusted By" data-am="በ2000+">Trusted By</span><br/>
+          <em data-en="2,000+ Drivers" data-am="ሾፌሮች ታምኗቸዋል">2,000+ Drivers</em>
+        </h1>
+        <p class="hero-desc reveal-up" data-en="Serving mechanics, workshops and individual car owners with top-grade parts since 2014." data-am="ከ2014 ጀምሮ ሜካኒኮችን፣ ዎርክሾፖችን እና የግል መኪና ባለቤቶችን ምርጥ ዕቃዎች እያቀረብን ነው።">Serving mechanics, workshops and individual car owners with top-grade parts since 2014.</p>
+        <div class="hero-btns reveal-up">
+          <a href="#products" class="btn-hero-primary"><i class="fa-solid fa-box-open"></i> <span data-en="Browse Catalog" data-am="ካታሎግ ይመልከቱ">Browse Catalog</span></a>
+          <a href="#contact" class="btn-hero-outline"><span data-en="Contact Us" data-am="ያግኙን">Contact Us</span> <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-car-graphic">
+          <div class="car-glow glow-blue"></div>
+          <i class="fa-solid fa-wrench hero-car-icon icon-wrench"></i>
+          <div class="floating-badge b1"><i class="fa-solid fa-star"></i> <span>4.9 / 5.0</span></div>
+          <div class="floating-badge b2"><i class="fa-solid fa-clock"></i> <span data-en="Same Day" data-am="ዛሬውኑ">Same Day</span></div>
+          <div class="floating-badge b3"><i class="fa-solid fa-rotate-left"></i> <span data-en="Easy Returns" data-am="ቀላል መመለስ">Easy Returns</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-slide slide-orange">
+      <div class="hero-bg-shape"></div>
+      <div class="hero-content">
+        <div class="hero-badge reveal"><i class="fa-solid fa-fire"></i> <span data-en="Special Offers This Week" data-am="የዚህ ሳምንት ልዩ ቅናሽ">Special Offers This Week</span></div>
+        <h1 class="hero-title reveal-up">
+          <span data-en="Huge Deals on" data-am="ትልቅ ቅናሽ">Huge Deals on</span><br/>
+          <em data-en="Engine Parts" data-am="የሞተር ዕቃዎች">Engine Parts</em>
+        </h1>
+        <p class="hero-desc reveal-up" data-en="Up to 30% off on filters, belts, spark plugs and more. Limited stock available." data-am="እስከ 30% ቅናሽ ማጣሪያዎች፣ ቤልቶች፣ ስፓርክ ፕላጎች እና ሌሎች። ክምችቱ ውስን ነው።">Up to 30% off on filters, belts, spark plugs and more. Limited stock available.</p>
+        <div class="hero-btns reveal-up">
+          <a href="#products" class="btn-hero-primary"><i class="fa-solid fa-percent"></i> <span data-en="Grab Deals" data-am="ቅናሽ ያግኙ">Grab Deals</span></a>
+          <a href="#blog" class="btn-hero-outline"><span data-en="Read Blog" data-am="ጦማር ያንብቡ">Read Blog</span> <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-car-graphic">
+          <div class="car-glow glow-orange"></div>
+          <i class="fa-solid fa-gear hero-car-icon icon-gear"></i>
+          <div class="floating-badge b1"><i class="fa-solid fa-percent"></i> <span>30% OFF</span></div>
+          <div class="floating-badge b2"><i class="fa-solid fa-fire"></i> <span data-en="Hot Deals" data-am="ልዩ ቅናሽ">Hot Deals</span></div>
+          <div class="floating-badge b3"><i class="fa-solid fa-hourglass-half"></i> <span data-en="Limited Time" data-am="ውስን ጊዜ">Limited Time</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <button class="slide-btn prev" onclick="changeSlide(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+  <button class="slide-btn next" onclick="changeSlide(1)"><i class="fa-solid fa-chevron-right"></i></button>
+  <div class="slide-dots" id="slideDots"></div>
+  <div class="hero-scroll-hint"><i class="fa-solid fa-chevron-down"></i></div>
+</section>
+
+<!-- ═══ MARQUEE STRIP ══════════════════════════════════════════════════════════ -->
+<div class="marquee-strip">
+  <div class="marquee-inner">
+    <span><i class="fa-solid fa-check-circle"></i> Genuine OEM Parts</span>
+    <span><i class="fa-solid fa-truck-fast"></i> Fast Nationwide Delivery</span>
+    <span><i class="fa-solid fa-shield-halved"></i> Quality Guaranteed</span>
+    <span><i class="fa-solid fa-phone"></i> Expert Support</span>
+    <span><i class="fa-solid fa-tags"></i> Best Prices in Ethiopia</span>
+    <span><i class="fa-solid fa-rotate-left"></i> Easy Returns</span>
+    <span><i class="fa-solid fa-check-circle"></i> Genuine OEM Parts</span>
+    <span><i class="fa-solid fa-truck-fast"></i> Fast Nationwide Delivery</span>
+    <span><i class="fa-solid fa-shield-halved"></i> Quality Guaranteed</span>
+    <span><i class="fa-solid fa-phone"></i> Expert Support</span>
+    <span><i class="fa-solid fa-tags"></i> Best Prices in Ethiopia</span>
+    <span><i class="fa-solid fa-rotate-left"></i> Easy Returns</span>
+  </div>
+</div>
+
+<!-- ═══ STATS BAR ══════════════════════════════════════════════════════════════ -->
+<section class="stats-bar">
+  <div class="container">
+    <div class="stat-card" data-count="500" data-suffix="+">
+      <div class="stat-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+      <div class="stat-number" id="stat0">0</div>
+      <div class="stat-label" data-en="Products Available" data-am="ምርቶች አሉ">Products Available</div>
+    </div>
+    <div class="stat-card" data-count="2000" data-suffix="+">
+      <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+      <div class="stat-number" id="stat1">0</div>
+      <div class="stat-label" data-en="Happy Customers" data-am="ደስተኛ ደንበኞች">Happy Customers</div>
+    </div>
+    <div class="stat-card" data-count="10" data-suffix=" Yrs">
+      <div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+      <div class="stat-number" id="stat2">0</div>
+      <div class="stat-label" data-en="Years Experience" data-am="ዓመት ልምድ">Years Experience</div>
+    </div>
+    <div class="stat-card" data-count="50" data-suffix="+">
+      <div class="stat-icon"><i class="fa-solid fa-star"></i></div>
+      <div class="stat-number" id="stat3">0</div>
+      <div class="stat-label" data-en="Brand Partners" data-am="የምርት አጋሮች">Brand Partners</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FEATURES ══════════════════════════════════════════════════════════════ -->
+<section class="features-section">
+  <div class="container">
+    <div class="section-title">
+      <span class="section-tag" data-en="Why Choose Us" data-am="ለምን ይምረጡን">Why Choose Us</span>
+      <h2 data-en="The Dujana Advantage" data-am="የዱጃና ጥቅም">The Dujana Advantage</h2>
+      <p data-en="We go beyond just selling parts — we ensure your vehicle stays road-ready." data-am="ዕቃዎችን ከመሸጥ ባለፈ — ተሽከርካሪዎ ሁልጊዜ ዝግጁ መሆኑን እናረጋግጣለን።">We go beyond just selling parts — we ensure your vehicle stays road-ready.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon green"><i class="fa-solid fa-certificate"></i></div>
+        <h3 data-en="100% Genuine Parts" data-am="100% ትክክለኛ ዕቃዎች">100% Genuine Parts</h3>
+        <p data-en="Every part we sell is sourced from verified manufacturers and certified suppliers." data-am="የምንሸጠው እያንዳንዱ ዕቃ ከተረጋገጡ አምራቾች ይመጣል።">Every part we sell is sourced from verified manufacturers and certified suppliers.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon blue"><i class="fa-solid fa-headset"></i></div>
+        <h3 data-en="Expert Consultation" data-am="የባለሙያ ምክር">Expert Consultation</h3>
+        <p data-en="Our team of auto experts helps you find the exact part for your vehicle model." data-am="የኛ የሞተር ባለሙያዎች ቡድን ለሞተርዎ ሞዴል ትክክለኛ ዕቃ እንዲያገኙ ይረዳዎታል።">Our team of auto experts helps you find the exact part for your vehicle model.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon orange"><i class="fa-solid fa-truck-fast"></i></div>
+        <h3 data-en="Lightning Fast Delivery" data-am="ፈጣን ማድረስ">Lightning Fast Delivery</h3>
+        <p data-en="Same-day delivery within Addis Ababa. Nationwide shipping within 3-5 days." data-am="በአዲስ አበባ ውስጥ ዛሬውኑ ማድረስ። ሀገር አቀፍ ላኪ በ3-5 ቀናት።">Same-day delivery within Addis Ababa. Nationwide shipping within 3-5 days.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon purple"><i class="fa-solid fa-tags"></i></div>
+        <h3 data-en="Competitive Pricing" data-am="ተወዳዳሪ ዋጋ">Competitive Pricing</h3>
+        <p data-en="We offer the best market prices with regular discounts and loyalty rewards." data-am="መደበኛ ቅናሾችን እና ታማኝነት ሽልማቶችን ጨምሮ ምርጥ የገበያ ዋጋዎችን እንሰጣለን።">We offer the best market prices with regular discounts and loyalty rewards.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon red"><i class="fa-solid fa-shield-halved"></i></div>
+        <h3 data-en="Warranty Protected" data-am="ዋስትና ተጠብቋል">Warranty Protected</h3>
+        <p data-en="All parts come with manufacturer warranty. Hassle-free returns within 30 days." data-am="ሁሉም ዕቃዎች የአምራቾች ዋስትና አላቸው። ያለምንም ጭቅጭቅ ውስጥ 30 ቀናት ውስጥ መመለስ።">All parts come with manufacturer warranty. Hassle-free returns within 30 days.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon teal"><i class="fa-solid fa-mobile-screen"></i></div>
+        <h3 data-en="Easy Online Ordering" data-am="ቀላል የኦንላይን ትዕዛዝ">Easy Online Ordering</h3>
+        <p data-en="Browse, compare, and order directly through our website or call us anytime." data-am="ድህረ ገፃችን ላይ ይፈልጉ፣ ያወዳድሩ እና ይዘዙ ወይም በማንኛውም ጊዜ ይደውሉ።">Browse, compare, and order directly through our website or call us anytime.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ADMIN PANEL ══════════════════════════════════════════════════════════ -->
+<section class="admin-panel hidden" id="adminPanel">
+  <div class="container">
+    <div class="admin-bar">
+      <div class="admin-bar-left">
+        <div class="admin-avatar"><i class="fa-solid fa-user-shield"></i></div>
+        <div>
+          <p class="admin-greeting" data-en="Welcome back," data-am="እንኳን ደህና መጡ,">Welcome back,</p>
+          <strong id="adminName">Admin</strong>
+        </div>
+      </div>
+      <div class="admin-bar-right">
+        <button class="btn-add-product" onclick="openProductModal()">
+          <i class="fa-solid fa-plus"></i> <span data-en="Add Product" data-am="ምርት ጨምር">Add Product</span>
+        </button>
+        <button class="btn-logout" onclick="handleLogout()">
+          <i class="fa-solid fa-sign-out-alt"></i> <span data-en="Logout" data-am="ውጣ">Logout</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRODUCTS ════════════════════════════════════════════════════════════ -->
+<section class="products-section" id="products">
+  <div class="container">
+    <div class="section-title">
+      <span class="section-tag" data-en="Our Inventory" data-am="ዕቃዎቻችን">Our Inventory</span>
+      <h2 data-en="Browse Products" data-am="ምርቶችን ያስሱ">Browse Products</h2>
+    </div>
+    <div class="filters-bar">
+      <div class="search-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchInput" placeholder="Search parts..." data-placeholder-en="Search parts..." data-placeholder-am="ዕቃ ይፈልጉ..." oninput="filterProducts()"/>
+      </div>
+      <select id="categoryFilter" onchange="filterProducts()">
+        <option value="">All Categories</option>
+      </select>
+      <select id="priceFilter" onchange="filterProducts()">
+        <option value="">All Prices</option>
+        <option value="0-500">Under 500 ETB</option>
+        <option value="500-1500">500–1,500 ETB</option>
+        <option value="1500-5000">1,500–5,000 ETB</option>
+        <option value="5000+">5,000+ ETB</option>
+      </select>
+      <span id="productCount" class="product-count-badge"></span>
+    </div>
+    <div class="product-grid" id="productGrid"></div>
+    <div id="noProducts" class="no-products hidden">
+      <i class="fa-solid fa-box-open"></i>
+      <p data-en="No products found." data-am="ምንም ምርቶች አልተገኙም።">No products found.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ BLOG ══════════════════════════════════════════════════════════════════ -->
+<section class="blog-section" id="blog">
+  <div class="container">
+    <div class="section-title">
+      <span class="section-tag" data-en="Latest Articles" data-am="አዳዲስ ጽሁፎች">Latest Articles</span>
+      <h2 data-en="Auto Care Blog" data-am="የሞተር ጥንቃቄ ጦማር">Auto Care Blog</h2>
+      <p data-en="Tips, guides and expert advice to keep your vehicle in top condition." data-am="ተሽከርካሪዎን በምርጥ ሁኔታ ለማቆየት ጠቃሚ ምክሮች እና የባለሙያ ምክር።">Tips, guides and expert advice to keep your vehicle in top condition.</p>
+    </div>
+    <div class="blog-grid">
+      <div class="blog-card featured">
+        <div class="blog-img-wrap">
+          <div class="blog-img-placeholder" style="background:linear-gradient(135deg,#059669,#047857)">
+            <i class="fa-solid fa-oil-can"></i>
+          </div>
+          <span class="blog-cat-tag" data-en="Maintenance" data-am="ጥገና">Maintenance</span>
+        </div>
+        <div class="blog-body">
+          <div class="blog-meta"><i class="fa-regular fa-calendar"></i> Jan 15, 2025 &nbsp;·&nbsp; <i class="fa-regular fa-clock"></i> 5 min read</div>
+          <h3 data-en="How Often Should You Change Your Engine Oil?" data-am="የሞተር ዘይትዎን ምን ያህል ጊዜ መቀየር አለብዎ?">How Often Should You Change Your Engine Oil?</h3>
+          <p data-en="Engine oil is the lifeblood of your car. Learn the proper intervals for oil changes based on your driving habits and vehicle type." data-am="የሞተር ዘይት የመኪናዎ ደም ነው። ​​በሞተርዎ ዓይነት ላይ ተመስርቶ ዘይት ለመቀየር ትክክለኛ ጊዜዎችን ይወቁ።">Engine oil is the lifeblood of your car. Learn the proper intervals for oil changes based on your driving habits and vehicle type.</p>
+          <a href="#blog" class="blog-read-more" data-en="Read Article" data-am="ጽሁፉን ያንብቡ">Read Article <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <div class="blog-card">
+        <div class="blog-img-wrap">
+          <div class="blog-img-placeholder" style="background:linear-gradient(135deg,#2563eb,#1d4ed8)">
+            <i class="fa-solid fa-car-brake-hold"></i>
+          </div>
+          <span class="blog-cat-tag" data-en="Safety" data-am="ደህንነት">Safety</span>
+        </div>
+        <div class="blog-body">
+          <div class="blog-meta"><i class="fa-regular fa-calendar"></i> Jan 8, 2025</div>
+          <h3 data-en="5 Warning Signs Your Brakes Need Attention" data-am="5 የማስጠንቀቂያ ምልክቶች ብሬኮችዎ ትኩረት ያስፈልጋቸዋል">5 Warning Signs Your Brakes Need Attention</h3>
+          <p data-en="Don't wait until it's too late. Recognize these brake warning signs early." data-am="ዘግይቶ እስኪሆን አይጠብቁ። እነዚህን የብሬክ ምልክቶች일찍 ይለዩ።">Don't wait until it's too late. Recognize these brake warning signs early.</p>
+          <a href="#blog" class="blog-read-more" data-en="Read Article" data-am="ጽሁፉን ያንብቡ">Read Article <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <div class="blog-card">
+        <div class="blog-img-wrap">
+          <div class="blog-img-placeholder" style="background:linear-gradient(135deg,#ea580c,#c2410c)">
+            <i class="fa-solid fa-temperature-high"></i>
+          </div>
+          <span class="blog-cat-tag" data-en="Cooling" data-am="ማቀዝቀዣ">Cooling</span>
+        </div>
+        <div class="blog-body">
+          <div class="blog-meta"><i class="fa-regular fa-calendar"></i> Dec 22, 2024</div>
+          <h3 data-en="Preventing Engine Overheating in Ethiopian Heat" data-am="በኢትዮጵያ ሙቀት ሞተር ማቀዝቀዣ ዕቃዎች">Preventing Engine Overheating in Ethiopian Heat</h3>
+          <p data-en="Ethiopia's climate demands extra care for your cooling system. Here's what you need to know." data-am="የኢትዮጵያ የአየር ሁኔታ ለማቀዝቀዣ ስርዓትዎ ልዩ ትኩረት ይፈልጋል።">Ethiopia's climate demands extra care for your cooling system. Here's what you need to know.</p>
+          <a href="#blog" class="blog-read-more" data-en="Read Article" data-am="ጽሁፉን ያንብቡ">Read Article <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <div class="blog-card">
+        <div class="blog-img-wrap">
+          <div class="blog-img-placeholder" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <span class="blog-cat-tag" data-en="Electrical" data-am="ኤሌክትሪካል">Electrical</span>
+        </div>
+        <div class="blog-body">
+          <div class="blog-meta"><i class="fa-regular fa-calendar"></i> Dec 10, 2024</div>
+          <h3 data-en="Understanding Your Car's Electrical System" data-am="የመኪናዎን የኤሌክትሪክ ሥርዓት መረዳት">Understanding Your Car's Electrical System</h3>
+          <p data-en="From alternators to fuses — a beginner's guide to auto electrical components." data-am="ከአልተርናተር እስከ ፊዩዝ — ለጀማሪዎች የኤሌክትሪካል ዕቃዎች መመሪያ።">From alternators to fuses — a beginner's guide to auto electrical components.</p>
+          <a href="#blog" class="blog-read-more" data-en="Read Article" data-am="ጽሁፉን ያንብቡ">Read Article <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <div class="blog-card">
+        <div class="blog-img-wrap">
+          <div class="blog-img-placeholder" style="background:linear-gradient(135deg,#0891b2,#0e7490)">
+            <i class="fa-solid fa-gauge-high"></i>
+          </div>
+          <span class="blog-cat-tag" data-en="Performance" data-am="አፈጻጸም">Performance</span>
+        </div>
+        <div class="blog-body">
+          <div class="blog-meta"><i class="fa-regular fa-calendar"></i> Nov 28, 2024</div>
+          <h3 data-en="Top 10 Upgrades to Boost Your Car's Performance" data-am="የመኪናዎን አፈጻጸም ለማሻሻል 10 ምርጥ ማሻሻያዎች">Top 10 Upgrades to Boost Your Car's Performance</h3>
+          <p data-en="Affordable modifications that can significantly improve horsepower and fuel economy." data-am="ፈረስ ኃይልን እና የነዳጅ ቆጣቢነትን በእጅጉ ሊያሻሽሉ የሚችሉ 저렴한 ማሻሻያዎች።">Affordable modifications that can significantly improve horsepower and fuel economy.</p>
+          <a href="#blog" class="blog-read-more" data-en="Read Article" data-am="ጽሁፉን ያንብቡ">Read Article <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TESTIMONIALS ════════════════════════════════════════════════════════ -->
+<section class="testimonials-section" id="about">
+  <div class="container">
+    <div class="section-title light">
+      <span class="section-tag" data-en="Customer Reviews" data-am="የደንበኛ ግምገማዎች">Customer Reviews</span>
+      <h2 data-en="What Our Clients Say" data-am="ደንበኞቻችን ምን ይላሉ">What Our Clients Say</h2>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p data-en="Best auto parts store in Addis! Fast delivery and genuine parts. I've been buying from Dujana for 3 years." data-am="በአዲስ አበባ ምርጥ የቅ/ዕቃ ሱቅ! ፈጣን ማድረስ እና ትክክለኛ ዕቃዎች። ለ3 ዓመታት ከዱጃና እገዛለሁ።">"Best auto parts store in Addis! Fast delivery and genuine parts. I've been buying from Dujana for 3 years."</p>
+        <div class="reviewer"><div class="reviewer-avatar">AT</div><div><strong>Abebe Tadesse</strong><span>Workshop Owner</span></div></div>
+      </div>
+      <div class="testimonial-card featured-testimonial">
+        <div class="stars">★★★★★</div>
+        <p data-en="Found a rare transmission part I couldn't locate anywhere else. The team was knowledgeable and helpful throughout." data-am="ሌላ ቦታ ሊያገኘው ያልቻልኩትን ያልተለመደ ዕቃ አገኘሁ። ቡድኑ ዕውቀት ያለው እና ረዳኝ።">"Found a rare transmission part I couldn't locate anywhere else. The team was knowledgeable and helpful throughout."</p>
+        <div class="reviewer"><div class="reviewer-avatar">SB</div><div><strong>Sara Bekele</strong><span>Fleet Manager</span></div></div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p data-en="Very competitive prices and the quality is always top-notch. My go-to place for all vehicle maintenance." data-am="በጣም ተወዳዳሪ ዋጋዎች እና ጥራቱ ሁልጊዜ ምርጥ ነው። ለሁሉም ተሽከርካሪ ጥገና የምሄደው ቦታ።">"Very competitive prices and the quality is always top-notch. My go-to place for all vehicle maintenance."</p>
+        <div class="reviewer"><div class="reviewer-avatar">MH</div><div><strong>Meseret Haile</strong><span>Car Owner</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CONTACT ════════════════════════════════════════════════════════════════ -->
+<section class="contact-section" id="contact">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="contact-info">
+        <div class="section-tag" data-en="Get In Touch" data-am="ያግኙን">Get In Touch</div>
+        <h2 data-en="Visit Our Store" data-am="ሱቃችንን ይጎብኙ">Visit Our Store</h2>
+        <p data-en="We're open 6 days a week to serve you with all your auto parts needs." data-am="ሳምንት 6 ቀናት ለሁሉም የቅ/ዕቃ ፍላጎቶችዎ ለማገልገል ክፍት ነን።">We're open 6 days a week to serve you with all your auto parts needs.</p>
+        <div class="contact-items">
+          <div class="contact-item"><div class="ci-icon"><i class="fa-solid fa-location-dot"></i></div><div><strong data-en="Address" data-am="አድራሻ">Address</strong><p data-en="Bole Road, Addis Ababa, Ethiopia" data-am="ቦሌ መንገድ፣ አዲስ አበባ፣ ኢትዮጵያ">Bole Road, Addis Ababa, Ethiopia</p></div></div>
+          <div class="contact-item"><div class="ci-icon"><i class="fa-solid fa-phone"></i></div><div><strong data-en="Phone" data-am="ስልክ">Phone</strong><p>+251 911 234 567</p></div></div>
+          <div class="contact-item"><div class="ci-icon"><i class="fa-solid fa-envelope"></i></div><div><strong data-en="Email" data-am="ኢሜይል">Email</strong><p>info@dujanaparts.com</p></div></div>
+          <div class="contact-item"><div class="ci-icon"><i class="fa-solid fa-clock"></i></div><div><strong data-en="Hours" data-am="ሰዓታት">Hours</strong><p data-en="Mon–Sat: 8AM – 7PM" data-am="ሰኞ–ቅዳሜ: 8 ጥዋት – 7 ምሽት">Mon–Sat: 8AM – 7PM</p></div></div>
+        </div>
+        <div class="social-links">
+          <a href="#" class="social-btn"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#" class="social-btn"><i class="fa-brands fa-telegram"></i></a>
+          <a href="#" class="social-btn"><i class="fa-brands fa-whatsapp"></i></a>
+          <a href="#" class="social-btn"><i class="fa-brands fa-youtube"></i></a>
+        </div>
+      </div>
+      <div class="contact-map-card">
+        <div class="map-placeholder">
+          <i class="fa-solid fa-map-location-dot"></i>
+          <p data-en="Bole Road, Addis Ababa" data-am="ቦሌ መንገድ፣ አዲስ አበባ">Bole Road, Addis Ababa</p>
+          <a href="https://maps.google.com" target="_blank" class="btn-directions"><i class="fa-solid fa-diamond-turn-right"></i> <span data-en="Get Directions" data-am="አቅጣጫ ያግኙ">Get Directions</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ════════════════════════════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-top">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo"><i class="fa-solid fa-gear"></i> DUJANA</div>
+          <p data-en="Your trusted partner for quality auto parts in Ethiopia since 2014." data-am="ከ2014 ጀምሮ በኢትዮጵያ ለጥራት ያለው የቅ/ዕቃ ታማኝ አጋርዎ።">Your trusted partner for quality auto parts in Ethiopia since 2014.</p>
+        </div>
+        <div class="footer-links">
+          <h4 data-en="Quick Links" data-am="ፈጣን አገናኞች">Quick Links</h4>
+          <a href="#hero">Home</a>
+          <a href="#products">Products</a>
+          <a href="#blog">Blog</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+        </div>
+        <div class="footer-links">
+          <h4 data-en="Categories" data-am="ምድቦች">Categories</h4>
+          <a href="#products">Engine Parts</a>
+          <a href="#products">Brakes</a>
+          <a href="#products">Suspension</a>
+          <a href="#products">Filters</a>
+          <a href="#products">Cooling</a>
+        </div>
+        <div class="footer-contact">
+          <h4 data-en="Contact" data-am="ያግኙን">Contact</h4>
+          <p><i class="fa-solid fa-phone"></i> +251 911 234 567</p>
+          <p><i class="fa-solid fa-envelope"></i> info@dujanaparts.com</p>
+          <p><i class="fa-solid fa-location-dot"></i> Bole Rd, Addis Ababa</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container">
+      <p>&copy; 2025 Dujana Spare Parts. <span data-en="All rights reserved." data-am="መብቱ የተጠበቀ ነው።">All rights reserved.</span></p>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══ LOGIN MODAL ════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="loginModal">
+  <div class="modal login-modal">
+    <button class="modal-close" onclick="closeLoginModal()"><i class="fa-solid fa-xmark"></i></button>
+    <div class="login-modal-top">
+      <div class="login-icon"><i class="fa-solid fa-shield-halved"></i></div>
+      <h2 data-en="Admin Access" data-am="አስተዳዳሪ መዳረሻ">Admin Access</h2>
+      <p data-en="Enter your admin password to continue." data-am="ለመቀጠል የአስተዳዳሪ የይለፍ ቃልዎን ያስገቡ።">Enter your admin password to continue.</p>
+    </div>
+    <form onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label data-en="Password" data-am="የይለፍ ቃል">Password</label>
+        <div class="password-wrap">
+          <input type="password" id="loginPassword" required autocomplete="current-password" placeholder="••••••••••••"/>
+          <button type="button" class="eye-btn" onclick="togglePasswordVisibility()"><i class="fa-solid fa-eye" id="eyeIcon"></i></button>
+        </div>
+      </div>
+      <button type="submit" class="btn-login-submit">
+        <i class="fa-solid fa-unlock"></i> <span data-en="Access Dashboard" data-am="ዳሽቦርድ ይድረሱ">Access Dashboard</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ PRODUCT MODAL ═════════════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="productModal">
+  <div class="modal modal-large">
+    <button class="modal-close" onclick="closeProductModal()"><i class="fa-solid fa-xmark"></i></button>
+    <h2 id="productModalTitle">Add Product</h2>
+    <form onsubmit="saveProduct(event)" id="productForm">
+      <input type="hidden" id="productId"/>
+      <div class="form-grid">
+        <div class="form-group"><label>Name (English)</label><input type="text" id="nameEn" required/></div>
+        <div class="form-group"><label>Name (Amharic)</label><input type="text" id="nameAm" required/></div>
+        <div class="form-group"><label>Price (ETB)</label><input type="number" id="price" min="0" step="0.01" required/></div>
+        <div class="form-group"><label>Stock</label><input type="number" id="stock" min="0" required/></div>
+        <div class="form-group"><label>Category (English)</label><input type="text" id="categoryEn" required/></div>
+        <div class="form-group"><label>Category (Amharic)</label><input type="text" id="categoryAm" required/></div>
+        <div class="form-group full-span"><label>Description (English)</label><textarea id="descEn" rows="3"></textarea></div>
+        <div class="form-group full-span"><label>Description (Amharic)</label><textarea id="descAm" rows="3"></textarea></div>
+        <div class="form-group"><label>Seller (English)</label><input type="text" id="sellerEn"/></div>
+        <div class="form-group"><label>Seller (Amharic)</label><input type="text" id="sellerAm"/></div>
+        <div class="form-group"><label>Phone</label><input type="text" id="phone" placeholder="+251..."/></div>
+        <div class="form-group full-span">
+          <label>Product Image</label>
+          <div class="image-upload-area" onclick="document.getElementById('imageInput').click()">
+            <img id="imagePreview" src="" alt="" class="hidden"/>
+            <div id="imageUploadPlaceholder"><i class="fa-solid fa-cloud-arrow-up"></i><span>Click to upload</span></div>
+          </div>
+          <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="uploadImage(event)"/>
+          <input type="hidden" id="imagePath"/>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeProductModal()">Cancel</button>
+        <button type="submit" class="btn-primary">Save Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ DETAIL MODAL ══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="detailModal">
+  <div class="modal modal-large">
+    <button class="modal-close" onclick="closeDetailModal()"><i class="fa-solid fa-xmark"></i></button>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <i class="fa-solid fa-arrow-up"></i>
+</button>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
