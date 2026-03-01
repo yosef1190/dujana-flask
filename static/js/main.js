@@ -1,526 +1,503 @@
-// ═══════════════════════════════════════════════════════════════════════════
-//  DUJANA SPARE PARTS — MAIN JS
-// ═══════════════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
+   DUJANA SPARE PARTS — MAIN JS
+   Light/Dark Theme · Mobile Nav · Bilingual EN/AM
+═══════════════════════════════════════════════════════════════ */
 
-// ── STATE ────────────────────────────────────────────────────────────────────
-let allProducts = [];
-let currentLang = 'en';
-let currentSlide = 0;
-let slideInterval = null;
-let isAdmin = false;
-let statsAnimated = false;
+/* ── STATE ───────────────────────────────────────────────────── */
+let currentLang    = 'en';
+let isDark         = false;
+let isAdmin        = false;
+let adminData      = null;
+let allProducts    = [];
+let categories     = [];
+let currentSlide   = 0;
+let slideTimer     = null;
+let searchDebounce = null;
 
-// ── INIT ─────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  initParticles();
-  checkAuth();
-  loadProducts();
-  initSlider();
-  buildDots();
-  initScrollEffects();
-  initHeader();
+/* ── INIT ────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', async () => {
+  // Restore theme preference
+  const saved = localStorage.getItem('dujana-theme');
+  if (saved === 'dark') applyDark(true, false);
+
+  initSlideshow();
+  await checkAuth();
+  await loadCategories();
+  await loadProducts();
+  hideSpinner();
+  initNavScroll();
 });
 
-// ── PARTICLES ────────────────────────────────────────────────────────────────
-function initParticles() {
-  const canvas = document.getElementById('particles');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+/* ── SPINNER ─────────────────────────────────────────────────── */
+function showSpinner() { document.getElementById('spinner').classList.remove('hidden'); }
+function hideSpinner() {
+  const s = document.getElementById('spinner');
+  s.style.opacity = '0'; s.style.transition = 'opacity .4s';
+  setTimeout(() => s.classList.add('hidden'), 420);
+}
 
-  const particles = Array.from({length:40}, () => ({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    r: Math.random() * 2 + 0.5,
-    dx: (Math.random() - 0.5) * 0.4,
-    dy: (Math.random() - 0.5) * 0.4,
-    o: Math.random() * 0.5 + 0.1
-  }));
+/* ── TOAST ───────────────────────────────────────────────────── */
+function showToast(msg, type = 'success') {
+  const icons = { success:'fa-circle-check', error:'fa-circle-xmark', warning:'fa-triangle-exclamation' };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<i class="fas ${icons[type]||icons.success}"></i><span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => { el.classList.add('toast-out'); setTimeout(() => el.remove(), 280); }, 3400);
+}
 
-  function draw() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    particles.forEach(p => {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(5,150,105,${p.o})`;
-      ctx.fill();
-      p.x += p.dx; p.y += p.dy;
-      if (p.x<0||p.x>canvas.width) p.dx*=-1;
-      if (p.y<0||p.y>canvas.height) p.dy*=-1;
-    });
-    requestAnimationFrame(draw);
+/* ── THEME ───────────────────────────────────────────────────── */
+function toggleTheme() { applyDark(!isDark, true); }
+
+function applyDark(dark, save = true) {
+  isDark = dark;
+  const root = document.documentElement;
+  const icon = document.getElementById('themeIcon');
+  if (dark) {
+    root.setAttribute('data-theme', 'dark');
+    icon.className = 'fas fa-sun';
+  } else {
+    root.setAttribute('data-theme', 'light');
+    icon.className = 'fas fa-moon';
   }
-  draw();
-
-  window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  });
+  if (save) localStorage.setItem('dujana-theme', dark ? 'dark' : 'light');
 }
 
-// ── HEADER SCROLL ────────────────────────────────────────────────────────────
-function initHeader() {
-  const header = document.getElementById('mainHeader');
-  const scrollTop = document.getElementById('scrollTop');
+/* ── NAV SCROLL EFFECT ───────────────────────────────────────── */
+function initNavScroll() {
+  const navbar = document.getElementById('navbar');
   window.addEventListener('scroll', () => {
-    header.classList.toggle('scrolled', window.scrollY > 20);
-    scrollTop.classList.toggle('visible', window.scrollY > 400);
-    updateActiveNav();
-  });
+    if (window.scrollY > 20) navbar.style.boxShadow = 'var(--shadow)';
+    else navbar.style.boxShadow = 'none';
+  }, { passive: true });
 }
 
-function updateActiveNav() {
-  const sections = ['hero','products','blog','about','contact'];
-  const links = document.querySelectorAll('.nav-links a');
-  let current = '';
-  sections.forEach(id => {
-    const el = document.getElementById(id);
-    if (el && window.scrollY >= el.offsetTop - 100) current = id;
-  });
-  links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === `#${current}`));
-}
-
+/* ── MOBILE NAV ──────────────────────────────────────────────── */
 function toggleMobileNav() {
-  document.getElementById('mobileNav').classList.toggle('open');
+  const nav = document.getElementById('mobileNav');
+  const btn = document.getElementById('hamburgerBtn');
+  const open = nav.classList.toggle('open');
+  btn.innerHTML = open ? '<i class="fas fa-xmark"></i>' : '<i class="fas fa-bars"></i>';
+}
+function closeMobileNav() {
+  document.getElementById('mobileNav').classList.remove('open');
+  document.getElementById('hamburgerBtn').innerHTML = '<i class="fas fa-bars"></i>';
 }
 
-// ── SCROLL REVEAL & STATS ─────────────────────────────────────────────────────
-function initScrollEffects() {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('revealed');
-        if (e.target.classList.contains('stats-bar') && !statsAnimated) {
-          statsAnimated = true;
-          animateStats();
-        }
-      }
-    });
-  }, { threshold: 0.1 });
-
-  // Only animate these — NOT product cards
-  document.querySelectorAll('.feature-card, .blog-card, .testimonial-card, .contact-item, .stats-bar').forEach(el => {
-    el.classList.add('animate-reveal');
-    observer.observe(el);
-  });
-
-  // Immediately reveal stat-cards inside stats-bar (handled by stats-bar observer)
-  observer.observe(document.querySelector('.stats-bar'));
-}
-
-function animateStats() {
-  document.querySelectorAll('.stat-card').forEach((card, i) => {
-    const target = parseInt(card.dataset.count);
-    const suffix = card.dataset.suffix || '';
-    const el = document.getElementById(`stat${i}`);
-    if (!el) return;
-    let start = 0;
-    const duration = 1800;
-    const step = (timestamp) => {
-      if (!start) start = timestamp;
-      const progress = Math.min((timestamp - start) / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 3);
-      el.textContent = Math.round(ease * target).toLocaleString() + (progress === 1 ? suffix : '');
-      if (progress < 1) requestAnimationFrame(step);
-    };
-    setTimeout(() => requestAnimationFrame(step), i * 150);
-  });
-}
-
-// ── LANGUAGE ─────────────────────────────────────────────────────────────────
+/* ── LANGUAGE ────────────────────────────────────────────────── */
 function toggleLanguage() {
   currentLang = currentLang === 'en' ? 'am' : 'en';
-  document.getElementById('langLabel').textContent = currentLang === 'en' ? 'አማርኛ' : 'English';
-  document.body.classList.toggle('amharic', currentLang === 'am');
-  applyLanguage();
-  renderProducts(filterList());
+  document.body.classList.toggle('lang-en', currentLang === 'en');
+  document.body.classList.toggle('lang-am', currentLang === 'am');
+  renderProducts();
+  populateCategoryFilter();
+  updateResultsCount();
 }
 
-function applyLanguage() {
-  document.querySelectorAll('[data-en]').forEach(el => {
-    if (el.tagName !== 'INPUT') {
-      el.textContent = currentLang === 'am' ? (el.dataset.am || el.dataset.en) : el.dataset.en;
-    }
+/* ── SLIDESHOW ───────────────────────────────────────────────── */
+function initSlideshow() {
+  const slides = document.querySelectorAll('.slide');
+  const dotsEl = document.getElementById('slideDots');
+  dotsEl.innerHTML = '';
+  slides.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'slide-dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', `Slide ${i+1}`);
+    d.onclick = () => goToSlide(i);
+    dotsEl.appendChild(d);
   });
-  document.querySelectorAll('[data-placeholder-en]').forEach(el => {
-    el.placeholder = currentLang === 'am' ? (el.dataset.placeholderAm || el.dataset.placeholderEn) : el.dataset.placeholderEn;
-  });
-  updateCategoryFilter();
+  startSlideTimer();
+}
+function startSlideTimer() {
+  clearInterval(slideTimer);
+  slideTimer = setInterval(() => changeSlide(1), 5500);
+}
+function changeSlide(dir) {
+  const slides = document.querySelectorAll('.slide');
+  slides[currentSlide].classList.remove('active');
+  currentSlide = (currentSlide + dir + slides.length) % slides.length;
+  slides[currentSlide].classList.add('active');
+  updateDots(); startSlideTimer();
+}
+function goToSlide(idx) {
+  document.querySelectorAll('.slide')[currentSlide].classList.remove('active');
+  currentSlide = idx;
+  document.querySelectorAll('.slide')[currentSlide].classList.add('active');
+  updateDots(); startSlideTimer();
+}
+function updateDots() {
+  document.querySelectorAll('.slide-dot').forEach((d,i) => d.classList.toggle('active', i===currentSlide));
 }
 
-// ── PRODUCTS ─────────────────────────────────────────────────────────────────
-async function loadProducts() {
-  showSpinner();
-  try {
-    const res = await fetch('/api/products');
-    const data = await res.json();
-    if (data.success) {
-      allProducts = data.products;
-      updateCategoryFilter();
-      renderProducts(allProducts);
-    }
-  } catch { showToast('Failed to load products', 'error'); }
-  finally { hideSpinner(); }
-}
-
-function renderProducts(products) {
-  const grid = document.getElementById('productGrid');
-  const noP  = document.getElementById('noProducts');
-  const cnt  = document.getElementById('productCount');
-  cnt.textContent = `${products.length} ${currentLang === 'am' ? 'ምርቶች' : 'products'}`;
-  if (!products.length) { grid.innerHTML = ''; noP.classList.remove('hidden'); return; }
-  noP.classList.add('hidden');
-  grid.innerHTML = products.map((p, i) => cardHTML(p, i)).join('');
-}
-
-function cardHTML(p, i) {
-  const name     = currentLang === 'am' ? p.name_am : p.name_en;
-  const category = currentLang === 'am' ? p.category_am : p.category_en;
-  const desc     = currentLang === 'am' ? p.desc_am : p.desc_en;
-  const seller   = currentLang === 'am' ? p.seller_am : p.seller_en;
-  const low      = p.stock < 5;
-  const stockTxt = currentLang === 'am'
-    ? (p.stock === 0 ? 'አልተቀረ' : `${p.stock} ቀርቷል`)
-    : (p.stock === 0 ? 'Out of stock' : `${p.stock} in stock`);
-
-  const imgHtml = p.image_path
-    ? `<img class="product-img" src="${p.image_path}" alt="${name}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'product-img-placeholder\\'><i class=\\'fa-solid fa-car-side\\'></i></div>'">`
-    : `<div class="product-img-placeholder"><i class="fa-solid fa-car-side"></i></div>`;
-
-  const adminBtns = isAdmin ? `
-    <button class="btn-edit"   onclick="event.stopPropagation();openProductModal('${p.id}')"><i class="fa-solid fa-pen"></i></button>
-    <button class="btn-delete" onclick="event.stopPropagation();deleteProduct('${p.id}')"><i class="fa-solid fa-trash"></i></button>` : '';
-
-  const contactLabel = currentLang === 'am' ? 'ሻጭ ያነጋግሩ' : 'Contact Seller';
-
-  return `
-  <div class="product-card" onclick="openDetailModal('${p.id}')">
-    ${imgHtml}
-    <div class="product-body">
-      <div class="product-category">${category}</div>
-      <div class="product-name">${name}</div>
-      <div class="product-desc">${desc}</div>
-      <div class="product-footer">
-        <span class="product-price">${Number(p.price).toLocaleString()} ETB</span>
-        <span class="product-stock${low?' low':''}">${stockTxt}</span>
-      </div>
-    </div>
-    <div class="product-actions" onclick="event.stopPropagation()">
-      <button class="btn-contact" onclick="toggleSellerInfo('${p.id}')">
-        <i class="fa-solid fa-phone"></i> ${contactLabel}
-      </button>
-      ${adminBtns}
-    </div>
-    <div class="seller-info" id="seller-${p.id}">
-      <p><i class="fa-solid fa-store"></i> ${seller}</p>
-      <p><a href="tel:${p.phone}"><i class="fa-solid fa-phone"></i> ${p.phone}</a></p>
-    </div>
-  </div>`;
-}
-
-function toggleSellerInfo(id) {
-  document.getElementById(`seller-${id}`)?.classList.toggle('visible');
-}
-
-function filterProducts() { renderProducts(filterList()); }
-
-function filterList() {
-  const q   = document.getElementById('searchInput').value.toLowerCase();
-  const cat = document.getElementById('categoryFilter').value;
-  const pr  = document.getElementById('priceFilter').value;
-  return allProducts.filter(p => {
-    const nameMatch = p.name_en.toLowerCase().includes(q) || p.name_am.includes(q);
-    const catMatch  = !cat || p.category_en === cat;
-    let priceMatch  = true;
-    if (pr) {
-      const v = Number(p.price);
-      if (pr==='0-500')      priceMatch = v<500;
-      if (pr==='500-1500')   priceMatch = v>=500 && v<=1500;
-      if (pr==='1500-5000')  priceMatch = v>1500 && v<=5000;
-      if (pr==='5000+')      priceMatch = v>5000;
-    }
-    return nameMatch && catMatch && priceMatch;
-  });
-}
-
-function updateCategoryFilter() {
-  const sel = document.getElementById('categoryFilter');
-  const cur = sel.value;
-  const cats = [...new Set(allProducts.map(p => p.category_en))];
-  const lbl = currentLang === 'am' ? 'ሁሉም ምድቦች' : 'All Categories';
-  sel.innerHTML = `<option value="">${lbl}</option>` + cats.map(c => {
-    const am = allProducts.find(p=>p.category_en===c)?.category_am || c;
-    return `<option value="${c}" ${cur===c?'selected':''}>${currentLang==='am'?am:c}</option>`;
-  }).join('');
-}
-
-// ── DETAIL MODAL ──────────────────────────────────────────────────────────────
-function openDetailModal(id) {
-  const p = allProducts.find(x => x.id === id);
-  if (!p) return;
-  const name     = currentLang === 'am' ? p.name_am : p.name_en;
-  const category = currentLang === 'am' ? p.category_am : p.category_en;
-  const desc     = currentLang === 'am' ? p.desc_am : p.desc_en;
-  const seller   = currentLang === 'am' ? p.seller_am : p.seller_en;
-  const imgHtml  = p.image_path
-    ? `<img class="detail-img" src="${p.image_path}" alt="${name}">`
-    : `<div class="detail-img-ph"><i class="fa-solid fa-car-side"></i></div>`;
-
-  document.getElementById('detailContent').innerHTML = `
-    <div class="detail-grid">
-      <div>${imgHtml}</div>
-      <div>
-        <span class="detail-badge">${category}</span>
-        <div class="detail-title">${name}</div>
-        <div class="detail-price">${Number(p.price).toLocaleString()} ETB</div>
-        <div class="detail-desc">${desc}</div>
-        <div class="detail-meta">
-          <div class="detail-row"><i class="fa-solid fa-boxes-stacked"></i> ${currentLang==='am'?'ክምችት':'Stock'}: <strong>${p.stock}</strong></div>
-          <div class="detail-row"><i class="fa-solid fa-store"></i> ${currentLang==='am'?'ሻጭ':'Seller'}: <strong>${seller}</strong></div>
-          <div class="detail-row"><i class="fa-solid fa-phone"></i> <a href="tel:${p.phone}">${p.phone}</a></div>
-        </div>
-        <a href="tel:${p.phone}" class="btn-call"><i class="fa-solid fa-phone"></i> ${currentLang==='am'?'ደውሉ':'Call Now'}</a>
-      </div>
-    </div>`;
-  document.getElementById('detailModal').classList.remove('hidden');
-}
-function closeDetailModal() { document.getElementById('detailModal').classList.add('hidden'); }
-
-// ── AUTH ──────────────────────────────────────────────────────────────────────
+/* ── AUTH ────────────────────────────────────────────────────── */
 async function checkAuth() {
   try {
-    const res = await fetch('/api/check-auth');
-    const data = await res.json();
-    if (data.authenticated) setAdminMode(data.username);
-  } catch {}
+    const data = await fetchJSON('/api/check-auth');
+    if (data.authenticated) { isAdmin=true; adminData=data.admin; showAdminUI(); }
+    else { isAdmin=false; adminData=null; hideAdminUI(); }
+  } catch(e) {}
+}
+function showAdminUI() {
+  document.getElementById('adminNavBtn').classList.add('hidden');
+  document.getElementById('logoutBtn').classList.remove('hidden');
+  document.getElementById('adminBanner').classList.remove('hidden');
+  document.getElementById('adminName').textContent = adminData?.full_name ?? 'Admin';
+}
+function hideAdminUI() {
+  document.getElementById('adminNavBtn').classList.remove('hidden');
+  document.getElementById('logoutBtn').classList.add('hidden');
+  document.getElementById('adminBanner').classList.add('hidden');
 }
 
-function setAdminMode(username) {
-  isAdmin = true;
-  document.getElementById('adminName').textContent = username;
-  document.getElementById('adminPanel').classList.remove('hidden');
-  document.getElementById('adminBtn').innerHTML = `<i class="fa-solid fa-shield-halved"></i> ${username}`;
-  renderProducts(filterList());
-}
-
-function openLoginModal() {
-  if (isAdmin) {
-    document.getElementById('adminPanel').scrollIntoView({behavior:'smooth'});
-    return;
-  }
-  document.getElementById('loginModal').classList.remove('hidden');
-  setTimeout(() => document.getElementById('loginPassword').focus(), 300);
-}
-function closeLoginModal() {
-  document.getElementById('loginModal').classList.add('hidden');
-  document.getElementById('loginPassword').value = '';
-}
-
-async function handleLogin(e) {
-  e.preventDefault();
+async function handleLogin() {
+  const username = document.getElementById('loginUsername').value.trim();
   const password = document.getElementById('loginPassword').value;
-  showSpinner();
+  if (!username||!password) {
+    showFormError('loginError', currentLang==='en'?'Enter username and password.':'ያስፈልጋሉ።'); return;
+  }
+  hideFormError('loginError');
+  const btn = document.getElementById('loginBtn');
+  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
   try {
-    const res = await fetch('/api/login', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ password })
-    });
-    const data = await res.json();
-    if (data.success) {
-      setAdminMode(data.admin.username);
-      closeLoginModal();
-      showToast(currentLang==='am'?'ዳሽቦርድ ተከፈተ':'Dashboard unlocked', 'success');
-    } else {
-      showToast(currentLang==='am'?'የይለፍ ቃሉ ትክክል አይደለም':'Incorrect password', 'error');
-    }
-  } catch { showToast('Connection error', 'error'); }
-  finally { hideSpinner(); }
+    const data = await fetchJSON('/api/login','POST',{username,password});
+    isAdmin=true; adminData=data.admin; showAdminUI();
+    closeModal('loginModal');
+    document.getElementById('loginUsername').value='';
+    document.getElementById('loginPassword').value='';
+    showToast(currentLang==='en'?`Welcome, ${data.admin.full_name}!`:`እንኳን ደህና, ${data.admin.full_name}!`,'success');
+    renderProducts();
+  } catch(e) {
+    showFormError('loginError', e.message||(currentLang==='en'?'Invalid credentials.':'ትክክለኛ ያልሆነ።'));
+  } finally {
+    btn.disabled=false;
+    btn.innerHTML='<i class="fas fa-arrow-right-to-bracket"></i><span class="lang-en-text">Sign In</span><span class="lang-am-text">ግባ</span>';
+  }
 }
 
 async function handleLogout() {
-  showSpinner();
   try {
-    await fetch('/api/logout', {method:'POST'});
-    isAdmin = false;
-    document.getElementById('adminPanel').classList.add('hidden');
-    document.getElementById('adminBtn').innerHTML = `<i class="fa-solid fa-shield-halved"></i> Admin`;
-    showToast(currentLang==='am'?'ወጥቷል':'Logged out', 'info');
-    renderProducts(filterList());
-  } finally { hideSpinner(); }
+    await fetchJSON('/api/logout','POST');
+    isAdmin=false; adminData=null; hideAdminUI();
+    showToast(currentLang==='en'?'Logged out.':'ወጥተዋል።','success');
+    renderProducts();
+  } catch(e) { showToast('Logout failed.','error'); }
 }
 
-function togglePasswordVisibility() {
-  const inp = document.getElementById('loginPassword');
-  const ico = document.getElementById('eyeIcon');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  ico.className = `fa-solid fa-eye${inp.type==='password'?'':'-slash'}`;
-}
-
-// ── PRODUCT MODAL ─────────────────────────────────────────────────────────────
-async function openProductModal(id = null) {
-  document.getElementById('productForm').reset();
-  document.getElementById('imagePath').value = '';
-  document.getElementById('imagePreview').classList.add('hidden');
-  document.getElementById('imagePreview').src = '';
-  document.getElementById('imageUploadPlaceholder').style.display = 'flex';
-
-  if (id) {
-    const p = allProducts.find(x => x.id === id);
-    if (!p) return;
-    document.getElementById('productModalTitle').textContent = 'Edit Product';
-    document.getElementById('productId').value   = p.id;
-    document.getElementById('nameEn').value       = p.name_en;
-    document.getElementById('nameAm').value       = p.name_am;
-    document.getElementById('price').value        = p.price;
-    document.getElementById('stock').value        = p.stock;
-    document.getElementById('categoryEn').value   = p.category_en;
-    document.getElementById('categoryAm').value   = p.category_am;
-    document.getElementById('descEn').value       = p.desc_en;
-    document.getElementById('descAm').value       = p.desc_am;
-    document.getElementById('sellerEn').value     = p.seller_en;
-    document.getElementById('sellerAm').value     = p.seller_am;
-    document.getElementById('phone').value        = p.phone;
-    document.getElementById('imagePath').value    = p.image_path;
-    if (p.image_path) {
-      document.getElementById('imagePreview').src = p.image_path;
-      document.getElementById('imagePreview').classList.remove('hidden');
-      document.getElementById('imageUploadPlaceholder').style.display = 'none';
-    }
-  } else {
-    document.getElementById('productModalTitle').textContent = 'Add Product';
-    document.getElementById('productId').value = '';
-  }
-  document.getElementById('productModal').classList.remove('hidden');
-}
-function closeProductModal() { document.getElementById('productModal').classList.add('hidden'); }
-
-async function uploadImage(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const fd = new FormData(); fd.append('image', file);
-  showSpinner();
+/* ── PRODUCTS ────────────────────────────────────────────────── */
+async function loadProducts() {
   try {
-    const res = await fetch('/api/upload-image', {method:'POST', body:fd});
+    const p = new URLSearchParams();
+    const s = document.getElementById('searchInput').value.trim();
+    const c = document.getElementById('categoryFilter').value;
+    const mn= document.getElementById('minPrice').value;
+    const mx= document.getElementById('maxPrice').value;
+    if(s) p.set('search',s); if(c) p.set('category',c);
+    if(mn) p.set('min_price',mn); if(mx) p.set('max_price',mx);
+    const data = await fetchJSON(`/api/products?${p}`);
+    allProducts = data.products||[];
+    const cnt = document.getElementById('productsCount');
+    if(cnt) cnt.textContent = allProducts.length;
+    renderProducts();
+  } catch(e) { showToast('Failed to load products.','error'); }
+}
+
+async function loadCategories() {
+  try {
+    const data = await fetchJSON('/api/categories');
+    categories = data.categories||[];
+    populateCategoryFilter();
+  } catch(e) {}
+}
+
+function populateCategoryFilter() {
+  const sel = document.getElementById('categoryFilter');
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">${currentLang==='en'?'All Categories':'ሁሉም ምድቦች'}</option>`;
+  categories.forEach(c => {
+    const o = document.createElement('option');
+    o.value=c.en; o.textContent=currentLang==='en'?c.en:c.am;
+    if(o.value===cur) o.selected=true;
+    sel.appendChild(o);
+  });
+}
+
+function renderProducts() {
+  const grid  = document.getElementById('productsGrid');
+  const empty = document.getElementById('emptyState');
+  grid.innerHTML = '';
+  if(!allProducts.length) { empty.classList.remove('hidden'); updateResultsCount(); return; }
+  empty.classList.add('hidden');
+  allProducts.forEach(p => grid.appendChild(makeCard(p)));
+  updateResultsCount();
+}
+
+function updateResultsCount() {
+  const n  = allProducts.length;
+  const el = document.getElementById('resultsCount');
+  if(!el) return;
+  const cnt = document.getElementById('productsCount');
+  if(cnt) cnt.textContent = n;
+  el.textContent = n===0?'':(currentLang==='en'?`${n} product${n!==1?'s':''} found`:`${n} ምርቶች ተገኝተዋል`);
+}
+
+function makeCard(p) {
+  const name    = currentLang==='en'?p.name_en:p.name_am;
+  const cat     = currentLang==='en'?p.category_en:p.category_am;
+  const desc    = currentLang==='en'?p.desc_en:p.desc_am;
+  const price   = Number(p.price).toLocaleString('en-ET',{minimumFractionDigits:2});
+
+  let stockCls, stockLbl;
+  if(p.stock===0){ stockCls='out-stock'; stockLbl=currentLang==='en'?'Out of Stock':'አቅርቦት አልቋል'; }
+  else if(p.stock<=5){ stockCls='low-stock'; stockLbl=currentLang==='en'?`Low (${p.stock})`:`ትንሽ (${p.stock})`; }
+  else { stockCls='in-stock'; stockLbl=currentLang==='en'?`${p.stock} in stock`:`${p.stock} አለ`; }
+
+  const imgHTML = p.image_path
+    ? `<img src="${p.image_path}" alt="${name}" loading="lazy"
+         onerror="this.style.display='none';this.nextSibling.style.display='flex'" />
+       <div class="card-img-placeholder" style="display:none"><i class="fas fa-car-side"></i></div>`
+    : `<div class="card-img-placeholder"><i class="fas fa-car-side"></i></div>`;
+
+  const adminRow = isAdmin ? `
+    <div class="card-admin-row">
+      <button class="btn-edit" onclick="event.stopPropagation();openProductModal('${p.id}')">
+        <i class="fas fa-pen-to-square"></i>${currentLang==='en'?'Edit':'አርትዕ'}
+      </button>
+      <button class="btn-delete" onclick="event.stopPropagation();openConfirmDelete('${p.id}')">
+        <i class="fas fa-trash-can"></i>${currentLang==='en'?'Delete':'ሰርዝ'}
+      </button>
+    </div>` : '';
+
+  const card = document.createElement('div');
+  card.className = 'product-card';
+  card.onclick = e => { if(!e.target.closest('.card-admin-row,.btn-contact-seller,.seller-reveal')) openDetailModal(p); };
+  card.innerHTML = `
+    <div class="card-img">${imgHTML}</div>
+    <div class="card-body">
+      <div class="card-cat">${cat}</div>
+      <div class="card-name">${name}</div>
+      <div class="card-desc">${desc||'—'}</div>
+      <div class="card-meta">
+        <div class="card-price">${price}<span class="card-price-unit"> ETB</span></div>
+        <span class="card-stock ${stockCls}">${stockLbl}</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn-contact-seller" onclick="event.stopPropagation();toggleSellerInfo('seller-${p.id}')">
+        <i class="fas fa-phone"></i>
+        <span class="lang-en-text">Contact Seller</span>
+        <span class="lang-am-text">ሻጩን ያግኙ</span>
+      </button>
+      <div id="seller-${p.id}" class="seller-reveal hidden">
+        <div class="seller-row"><i class="fas fa-store"></i><span>${currentLang==='en'?p.seller_en:p.seller_am}</span></div>
+        <div class="seller-row"><i class="fas fa-phone"></i><a href="tel:${p.phone}">${p.phone}</a></div>
+      </div>
+      ${adminRow}
+    </div>`;
+  return card;
+}
+
+/* ── SEARCH / FILTER ─────────────────────────────────────────── */
+function debounceSearch(val) {
+  clearTimeout(searchDebounce);
+  document.getElementById('searchClear').style.display = val?'block':'none';
+  searchDebounce = setTimeout(loadProducts, 360);
+}
+function clearSearch() {
+  document.getElementById('searchInput').value='';
+  document.getElementById('searchClear').style.display='none';
+  loadProducts();
+}
+function applyFilters() { clearTimeout(searchDebounce); searchDebounce=setTimeout(loadProducts,260); }
+function clearFilters() {
+  document.getElementById('searchInput').value='';
+  document.getElementById('categoryFilter').value='';
+  document.getElementById('minPrice').value='';
+  document.getElementById('maxPrice').value='';
+  document.getElementById('searchClear').style.display='none';
+  loadProducts();
+}
+
+/* ── IMAGE UPLOAD ────────────────────────────────────────────── */
+async function uploadImage(input) {
+  if(!input.files?.[0]) return;
+  const file = input.files[0];
+  if(file.size>16*1024*1024){ showToast('Image must be under 16MB.','error'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img=document.getElementById('imagePreview');
+    img.src=e.target.result; img.classList.remove('hidden');
+    document.getElementById('imagePlaceholder').classList.add('hidden');
+  };
+  reader.readAsDataURL(file);
+  const fd = new FormData(); fd.append('image',file);
+  try {
+    const res  = await fetch('/api/upload-image',{method:'POST',body:fd});
     const data = await res.json();
-    if (data.success) {
-      document.getElementById('imagePath').value = data.image_path;
-      const prev = document.getElementById('imagePreview');
-      prev.src = data.image_path; prev.classList.remove('hidden');
-      document.getElementById('imageUploadPlaceholder').style.display = 'none';
-      showToast('Image uploaded', 'success');
-    } else { showToast(data.message || 'Upload failed', 'error'); }
-  } catch { showToast('Upload error', 'error'); }
-  finally { hideSpinner(); }
+    if(res.ok){ document.getElementById('productImagePath').value=data.image_path; showToast('Image uploaded!','success'); }
+    else showToast(data.error||'Upload failed.','error');
+  } catch(e){ showToast('Upload error.','error'); }
 }
 
-async function saveProduct(e) {
-  e.preventDefault();
+/* ── PRODUCT MODAL ───────────────────────────────────────────── */
+async function openProductModal(pid=null) {
+  if(!isAdmin){ openLoginModal(); return; }
+  ['productId','pNameEn','pNameAm','pPrice','pStock','pCategoryEn','pCategoryAm',
+   'pSellerEn','pSellerAm','pPhone','pDescEn','pDescAm','productImagePath']
+    .forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('imagePreview').classList.add('hidden');
+  document.getElementById('imagePlaceholder').classList.remove('hidden');
+  hideFormError('productError');
+
+  document.getElementById('productModalTitle').innerHTML = pid
+    ? '<span class="lang-en-text">Edit Product</span><span class="lang-am-text">ምርት አርትዕ</span>'
+    : '<span class="lang-en-text">Add Product</span><span class="lang-am-text">ምርት ጨምር</span>';
+
+  if(pid) {
+    try {
+      const {product:p} = await fetchJSON(`/api/products/${pid}`);
+      document.getElementById('productId').value       = p.id;
+      document.getElementById('pNameEn').value         = p.name_en;
+      document.getElementById('pNameAm').value         = p.name_am;
+      document.getElementById('pPrice').value          = p.price;
+      document.getElementById('pStock').value          = p.stock;
+      document.getElementById('pCategoryEn').value     = p.category_en;
+      document.getElementById('pCategoryAm').value     = p.category_am;
+      document.getElementById('pSellerEn').value       = p.seller_en;
+      document.getElementById('pSellerAm').value       = p.seller_am;
+      document.getElementById('pPhone').value          = p.phone;
+      document.getElementById('pDescEn').value         = p.desc_en;
+      document.getElementById('pDescAm').value         = p.desc_am;
+      document.getElementById('productImagePath').value= p.image_path;
+      if(p.image_path) {
+        const img=document.getElementById('imagePreview');
+        img.src=p.image_path; img.classList.remove('hidden');
+        document.getElementById('imagePlaceholder').classList.add('hidden');
+      }
+    } catch(e){ showToast('Failed to load product.','error'); }
+  }
+  openModal('productModal');
+}
+
+async function saveProduct() {
   const id = document.getElementById('productId').value;
   const payload = {
-    name_en: document.getElementById('nameEn').value,
-    name_am: document.getElementById('nameAm').value,
-    price: document.getElementById('price').value,
-    stock: document.getElementById('stock').value,
-    category_en: document.getElementById('categoryEn').value,
-    category_am: document.getElementById('categoryAm').value,
-    desc_en: document.getElementById('descEn').value,
-    desc_am: document.getElementById('descAm').value,
-    seller_en: document.getElementById('sellerEn').value,
-    seller_am: document.getElementById('sellerAm').value,
-    phone: document.getElementById('phone').value,
-    image_path: document.getElementById('imagePath').value
+    name_en:     document.getElementById('pNameEn').value.trim(),
+    name_am:     document.getElementById('pNameAm').value.trim(),
+    price:       parseFloat(document.getElementById('pPrice').value)||0,
+    stock:       parseInt(document.getElementById('pStock').value)||0,
+    category_en: document.getElementById('pCategoryEn').value.trim(),
+    category_am: document.getElementById('pCategoryAm').value.trim(),
+    seller_en:   document.getElementById('pSellerEn').value.trim(),
+    seller_am:   document.getElementById('pSellerAm').value.trim(),
+    phone:       document.getElementById('pPhone').value.trim(),
+    desc_en:     document.getElementById('pDescEn').value.trim(),
+    desc_am:     document.getElementById('pDescAm').value.trim(),
+    image_path:  document.getElementById('productImagePath').value,
   };
-  showSpinner();
+  if(!payload.name_en||!payload.name_am){ showFormError('productError','Both language names required.'); return; }
+  if(!payload.category_en||!payload.category_am){ showFormError('productError','Both language categories required.'); return; }
+  if(payload.price<=0){ showFormError('productError','Enter a valid price.'); return; }
+  hideFormError('productError');
+  const btn=document.getElementById('saveProductBtn');
+  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
   try {
-    const res = await fetch(id ? `/api/products/${id}` : '/api/products', {
-      method: id ? 'PUT' : 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if (data.success) {
-      showToast(id ? 'Product updated' : 'Product added', 'success');
-      closeProductModal(); await loadProducts();
-    } else { showToast(data.message || 'Failed', 'error'); }
-  } catch { showToast('Error saving', 'error'); }
-  finally { hideSpinner(); }
-}
-
-async function deleteProduct(id) {
-  if (!confirm('Delete this product?')) return;
-  showSpinner();
-  try {
-    const res = await fetch(`/api/products/${id}`, {method:'DELETE'});
-    const data = await res.json();
-    if (data.success) { showToast('Product deleted', 'success'); await loadProducts(); }
-  } catch { showToast('Delete failed', 'error'); }
-  finally { hideSpinner(); }
-}
-
-// ── HERO SLIDER ───────────────────────────────────────────────────────────────
-function buildDots() {
-  const slides = document.querySelectorAll('.hero-slide');
-  const cnt = document.getElementById('slideDots');
-  slides.forEach((_,i) => {
-    const d = document.createElement('span');
-    d.className = 'dot' + (i===0?' active':'');
-    d.onclick = () => goToSlide(i);
-    cnt.appendChild(d);
-  });
-  slideInterval = setInterval(() => changeSlide(1), 6000);
-}
-
-function changeSlide(dir) {
-  const slides = document.querySelectorAll('.hero-slide');
-  const dots   = document.querySelectorAll('.dot');
-  slides[currentSlide].classList.remove('active');
-  dots[currentSlide].classList.remove('active');
-  currentSlide = (currentSlide + dir + slides.length) % slides.length;
-  slides[currentSlide].classList.add('active');
-  dots[currentSlide].classList.add('active');
-  clearInterval(slideInterval);
-  slideInterval = setInterval(() => changeSlide(1), 6000);
-}
-
-function initSlider() {} // Handled in buildDots
-
-function goToSlide(i) {
-  const slides = document.querySelectorAll('.hero-slide');
-  const dots   = document.querySelectorAll('.dot');
-  slides[currentSlide].classList.remove('active');
-  dots[currentSlide].classList.remove('active');
-  currentSlide = i;
-  slides[currentSlide].classList.add('active');
-  dots[currentSlide].classList.add('active');
-  clearInterval(slideInterval);
-  slideInterval = setInterval(() => changeSlide(1), 6000);
-}
-
-// ── UTILS ──────────────────────────────────────────────────────────────────────
-function showSpinner() { document.getElementById('spinner').classList.remove('hidden'); }
-function hideSpinner() { document.getElementById('spinner').classList.add('hidden'); }
-
-function showToast(msg, type='info') {
-  const icons = {success:'fa-circle-check', error:'fa-circle-xmark', info:'fa-circle-info'};
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.innerHTML = `<i class="fa-solid ${icons[type]}"></i> ${msg}`;
-  document.getElementById('toast-container').appendChild(t);
-  setTimeout(() => t.remove(), 3200);
-}
-
-// Close modal on overlay click
-document.addEventListener('click', e => {
-  if (e.target.classList.contains('modal-overlay'))
-    e.target.classList.add('hidden');
-});
-
-// Keyboard close
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    ['loginModal','productModal','detailModal'].forEach(id =>
-      document.getElementById(id)?.classList.add('hidden')
-    );
+    await fetchJSON(id?`/api/products/${id}`:'/api/products', id?'PUT':'POST', payload);
+    closeModal('productModal');
+    showToast(id?(currentLang==='en'?'Product updated!':'ተዘምኗል!'):(currentLang==='en'?'Product added!':'ተጨምሯል!'),'success');
+    await loadCategories(); await loadProducts();
+  } catch(e){ showFormError('productError',e.message||'Save failed.'); }
+  finally {
+    btn.disabled=false;
+    btn.innerHTML='<i class="fas fa-floppy-disk"></i><span class="lang-en-text">Save Product</span><span class="lang-am-text">ምርት አስቀምጥ</span>';
   }
+}
+
+/* ── DELETE ──────────────────────────────────────────────────── */
+function openConfirmDelete(pid) { document.getElementById('deleteProductId').value=pid; openModal('confirmModal'); }
+async function confirmDelete() {
+  const id=document.getElementById('deleteProductId').value;
+  closeModal('confirmModal'); closeModal('detailModal');
+  try {
+    await fetchJSON(`/api/products/${id}`,'DELETE');
+    showToast(currentLang==='en'?'Product deleted.':'ምርቱ ተሰርዟል።','success');
+    await loadCategories(); await loadProducts();
+  } catch(e){ showToast(e.message||'Delete failed.','error'); }
+}
+
+/* ── DETAIL MODAL ────────────────────────────────────────────── */
+function openDetailModal(p) {
+  const name   = currentLang==='en'?p.name_en:p.name_am;
+  const cat    = currentLang==='en'?p.category_en:p.category_am;
+  const desc   = currentLang==='en'?p.desc_en:p.desc_am;
+  const seller = currentLang==='en'?p.seller_en:p.seller_am;
+  const price  = Number(p.price).toLocaleString('en-ET',{minimumFractionDigits:2});
+
+  document.getElementById('detailTitle').textContent   = name;
+  document.getElementById('detailCategory').textContent= cat;
+  document.getElementById('detailDesc').textContent    = desc||'—';
+  document.getElementById('detailPrice').textContent   = `${price} ETB`;
+  document.getElementById('detailSeller').textContent  = seller;
+  const ph=document.getElementById('detailPhone');
+  ph.textContent=p.phone; ph.href=`tel:${p.phone}`;
+
+  const stockEl=document.getElementById('detailStock');
+  if(p.stock===0){ stockEl.textContent=currentLang==='en'?'Out of Stock':'አቅርቦት አልቋል'; stockEl.className='detail-stock-badge card-stock out-stock'; }
+  else if(p.stock<=5){ stockEl.textContent=currentLang==='en'?`Only ${p.stock} left`:`ቀሪ ${p.stock}`; stockEl.className='detail-stock-badge card-stock low-stock'; }
+  else{ stockEl.textContent=currentLang==='en'?`In Stock (${p.stock})`:`አለ (${p.stock})`; stockEl.className='detail-stock-badge card-stock in-stock'; }
+
+  const imgEl=document.getElementById('detailImage');
+  if(p.image_path){ imgEl.src=p.image_path; imgEl.style.display='block'; imgEl.onerror=()=>{ imgEl.style.display='none'; }; }
+  else imgEl.style.display='none';
+
+  document.getElementById('detailContact').classList.add('hidden');
+
+  const adminAct=document.getElementById('detailAdminActions');
+  if(isAdmin){
+    adminAct.classList.remove('hidden');
+    document.getElementById('detailEditBtn').onclick  = ()=>{ closeModal('detailModal'); openProductModal(p.id); };
+    document.getElementById('detailDeleteBtn').onclick= ()=>{ closeModal('detailModal'); openConfirmDelete(p.id); };
+  } else adminAct.classList.add('hidden');
+
+  openModal('detailModal');
+}
+
+/* ── SELLER TOGGLE ───────────────────────────────────────────── */
+function toggleSellerInfo(id) { document.getElementById(id)?.classList.toggle('hidden'); }
+
+/* ── MODALS ──────────────────────────────────────────────────── */
+function openLoginModal() { if(isAdmin) return; openModal('loginModal'); setTimeout(()=>document.getElementById('loginUsername').focus(),80); }
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.body.style.overflow='hidden'; }
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+  if(!document.querySelector('.modal-overlay:not(.hidden)')) document.body.style.overflow='';
+}
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click', e=>{ if(e.target===o) closeModal(o.id); });
 });
+document.addEventListener('keydown', e=>{
+  if(e.key!=='Escape') return;
+  ['confirmModal','productModal','detailModal','loginModal'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el&&!el.classList.contains('hidden')) closeModal(id);
+  });
+});
+
+/* ── FORM HELPERS ────────────────────────────────────────────── */
+function showFormError(id,msg){ const e=document.getElementById(id); if(!e) return; e.textContent=msg; e.classList.remove('hidden'); }
+function hideFormError(id){ document.getElementById(id)?.classList.add('hidden'); }
+function togglePw(inputId,btn){
+  const inp=document.getElementById(inputId);
+  const ico=btn.querySelector('i');
+  if(inp.type==='password'){ inp.type='text'; ico.className='fas fa-eye-slash'; }
+  else { inp.type='password'; ico.className='fas fa-eye'; }
+}
+
+/* ── FETCH HELPER ────────────────────────────────────────────── */
+async function fetchJSON(url, method='GET', body=null) {
+  const opts={method,headers:{}};
+  if(body){ opts.headers['Content-Type']='application/json'; opts.body=JSON.stringify(body); }
+  const res  = await fetch(url,opts);
+  const data = await res.json();
+  if(!res.ok) throw new Error(data.error||data.message||`HTTP ${res.status}`);
+  return data;
+}
